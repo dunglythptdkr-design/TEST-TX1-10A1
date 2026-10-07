@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thử thách Vật lí THPT</title>
+<style>
+:root {
+  --bg1:#071a2f; --bg2:#123b62; --card:rgba(255,255,255,.10);
+  --text:#f7fbff; --muted:#bfd2e5; --accent:#58d5ff; --accent2:#7cf29a;
+  --danger:#ff7c8d; --gold:#ffd66b; --border:rgba(255,255,255,.18);
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:"Segoe UI",Arial,sans-serif;color:var(--text);
+ background:radial-gradient(circle at 20% 10%,#1c5b83 0,transparent 32%),linear-gradient(135deg,var(--bg1),var(--bg2));
+ overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;
+ background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:35px 35px}
+.app{width:min(1120px,94vw);margin:auto;padding:24px 0 40px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:18px}
+.brand{font-weight:800;letter-spacing:.4px;font-size:clamp(20px,3vw,30px)}
+.icon-btn,.btn{border:1px solid var(--border);color:var(--text);background:rgba(255,255,255,.09);
+ border-radius:16px;padding:13px 18px;font-size:16px;font-weight:700;cursor:pointer;transition:.2s;touch-action:manipulation}
+.icon-btn:hover,.btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.16)}
+.screen{display:none}
+.screen.active{display:block}
+.hero,.game-card,.result-card{background:var(--card);border:1px solid var(--border);backdrop-filter:blur(16px);
+ border-radius:28px;box-shadow:0 18px 50px rgba(0,0,0,.22)}
+.hero{padding:clamp(30px,6vw,70px);text-align:center;min-height:70vh;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.atom{font-size:78px;line-height:1;margin-bottom:15px;filter:drop-shadow(0 0 18px rgba(88,213,255,.5))}
+h1{font-size:clamp(38px,7vw,76px);margin:8px 0 14px;line-height:1.05}
+.subtitle{font-size:clamp(18px,2.5vw,26px);color:var(--muted);max-width:780px;line-height:1.55}
+
+/* Form Login */
+.login-box {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 400px;
+  margin: 25px auto;
+}
+.input-field {
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+  font-size: 18px;
+  outline: none;
+  font-family: inherit;
+  transition: .3s;
+}
+.input-field::placeholder { color: var(--muted); opacity: 0.7; }
+.input-field:focus { border-color: var(--accent); background: rgba(255,255,255,.15); box-shadow: 0 0 0 4px rgba(88,213,255,.2); }
+
+.big-start{font-size:clamp(20px,3vw,28px);padding:18px 40px;border-radius:20px;background:linear-gradient(135deg,#20a4d8,#4fd6ff);
+ color:#062038;border:0;box-shadow:0 12px 30px rgba(0,0,0,.25);width: 100%}
+.info{margin-top:18px;color:#d7e7f5;font-size:15px}
+.progress-wrap{margin-bottom:18px}
+.progress-meta{display:flex;justify-content:space-between;align-items: center;color:var(--muted);font-weight:700;margin-bottom:8px}
+
+/* Timer */
+#timerDisplay {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--danger);
+  padding: 6px 14px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(255,124,141,.3);
+  letter-spacing: 1px;
+}
+
+.progress{height:12px;background:rgba(255,255,255,.12);border-radius:999px;overflow:hidden}
+.progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .35s}
+.game-card{padding:clamp(22px,4vw,42px)}
+.question-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:20px}
+.badge{padding:8px 13px;border-radius:999px;background:rgba(88,213,255,.14);color:#bfeeff;font-weight:800}
+.question{font-size:clamp(24px,3.3vw,38px);font-weight:800;line-height:1.35;margin:12px 0 28px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.option{min-height:82px;text-align:left;padding:18px 20px;border-radius:20px;border:2px solid rgba(255,255,255,.15);
+ background:rgba(255,255,255,.07);color:var(--text);font-size:clamp(17px,2.2vw,23px);font-weight:650;cursor:pointer;
+ display:flex;gap:15px;align-items:flex-start;touch-action:manipulation}
+.option:hover{background:rgba(255,255,255,.13);border-color:rgba(88,213,255,.7);transform:translateY(-2px)}
+.option .letter{width:38px;height:38px;flex:0 0 38px;border-radius:50%;display:grid;place-items:center;
+ background:rgba(255,255,255,.12);font-weight:900}
+.option.disabled{cursor:default;pointer-events:none}
+/* Trạng thái khi học sinh chọn đáp án (màu trung tính) */
+.option.selected{border-color:var(--accent);background:rgba(88,213,255,.15)}
+
+.actions{display:flex;justify-content:flex-end;margin-top:20px}
+.next{background:linear-gradient(135deg,#20a4d8,#4fd6ff);color:#062038;border:0}
+.result-card{padding:clamp(30px,6vw,65px);text-align:center}
+.trophy{font-size:82px}
+.result-score{font-size:clamp(52px,10vw,92px);font-weight:900;color:var(--gold);margin:10px}
+.result-text{font-size:22px;color:var(--muted);line-height:1.6; white-space: pre-line;}
+.stats{display:flex;justify-content:center;gap:15px;flex-wrap:wrap;margin:25px 0}
+.stat{min-width:150px;padding:18px;border-radius:18px;background:rgba(255,255,255,.08)}
+.stat strong{display:block;font-size:30px}
+.stat strong.danger{color: var(--danger)}
+.stat strong.success{color: var(--accent2)}
+.stat strong.gold{color: var(--gold)}
+.hidden{display:none!important}
+@media(max-width:760px){
+ .options{grid-template-columns:1fr}
+ .app{width:min(96vw,1120px);padding-top:12px}
+ .question-head{align-items:flex-start}
+ .topbar{margin-bottom:10px}
+}
+@media(pointer:coarse){
+ .option{min-height:92px}
+ .btn,.icon-btn{min-height:52px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">⚛️ Thử thách Vật lí THPT</div>
+    <button class="icon-btn" id="soundBtn" aria-label="Bật hoặc tắt âm thanh">🔊 Âm thanh: Bật</button>
+  </div>
+
+  <section id="startScreen" class="screen active">
+    <div class="hero">
+      <div class="atom">⚛️</div>
+      <h1>Thử thách Vật lí THPT</h1>
+      <div class="subtitle">Hoàn thành bài kiểm tra trực tuyến • Thời gian 20 phút</div>
+      
+      <div class="login-box">
+        <input type="text" id="studentName" class="input-field" placeholder="Nhập họ và tên học sinh...">
+        <input type="text" id="studentClass" class="input-field" placeholder="Nhập lớp (VD: 10A1)...">
+        <button class="btn big-start" id="startBtn">🚀 Bắt đầu làm bài</button>
+      </div>
+
+      <div class="info">Lưu ý: Học sinh chỉ được nộp bài 1 lần duy nhất.</div>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="screen">
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="progressText">Câu 1 / 20</span>
+        <span id="timerDisplay">⏳ 20:00</span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+    <div class="game-card">
+      <div class="question-head">
+        <span class="badge" id="questionBadge">CÂU 1</span>
+      </div>
+      <div class="question" id="questionText"></div>
+      <div class="options" id="options"></div>
+      <div class="actions">
+        <button class="btn next hidden" id="nextBtn">Tiếp tục →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="resultScreen" class="screen">
+    <div class="result-card">
+      <div class="trophy" id="resultIcon">🏆</div>
+      <h1>Đã nộp bài!</h1>
+      <div class="result-text" id="resultMessage"></div>
+      <div class="stats">
+        <div class="stat"><span>Số câu đúng</span><strong class="success" id="correctCount">0</strong></div>
+        <div class="stat"><span>Số câu sai</span><strong class="danger" id="wrongCount">0</strong></div>
+        <div class="stat"><span>Tổng điểm / 10</span><strong class="gold" id="finalScore">0</strong></div>
+      </div>
+      <div class="info">Hệ thống đã ghi nhận kết quả của bạn. Có thể đóng trình duyệt.</div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   KHU VỰC DỮ LIỆU CÂU HỎI
+   ============================================================ */
+const QUESTIONS = [
+  { "question": "Một vật chuyển động trên một quỹ đạo bất kì. Phát biểu nào sau đây thể hiện đúng mối quan hệ giữa quãng đường đi được s và độ lớn độ dịch chuyển Δd của vật?", "options": [ "Quãng đường đi được luôn luôn lớn hơn độ lớn độ dịch chuyển.", "Quãng đường đi được luôn luôn bằng độ lớn độ dịch chuyển.", "Quãng đường đi được luôn lớn hơn hoặc bằng độ lớn độ dịch chuyển.", "Độ lớn độ dịch chuyển có thể lớn hơn quãng đường đi được trong một số trường hợp." ], "answer": 2, "points": 0.5 },
+  { "question": "Một chất điểm chuyển động đều trên một quỹ đạo tròn bán kính R. Khi chất điểm đi được đúng 3/4 chu vi đường tròn, tỉ số giữa tốc độ trung bình và độ lớn vận tốc trung bình là:", "options": [ "3π/(2√2)", "3π/4", "3π/√2", "2√2/(3π)" ], "answer": 0, "points": 0.5 },
+  { "question": "Một ô tô chuyển động trên một đoạn đường thẳng. Ô tô đi 1/3 quãng đường đầu với tốc độ 30 km/h và 2/3 quãng đường còn lại với tốc độ 60 km/h. Tốc độ trung bình của ô tô trên cả đoạn đường là:", "options": [ "45 km/h", "40 km/h", "50 km/h", "48 km/h" ], "answer": 0, "points": 0.5 },
+  { "question": "Một người đi thang cuốn từ tầng một lên tầng hai. Nếu đứng yên trên thang cuốn đang chạy thì mất 60 s; nếu thang dừng và người tự bước đi thì mất 90 s. Nếu người bước đi trên thang đang chạy cùng chiều thì thời gian là:", "options": [ "150 s", "36 s", "75 s", "30 s" ], "answer": 1, "points": 0.5 },
+  { "question": "Một ca nô qua một con sông có dòng nước chảy với vận tốc 3 m/s so với bờ. Vận tốc của ca nô so với nước là 4 m/s. Người lái giữ mũi ca nô vuông góc với bờ. Tốc độ của ca nô so với bờ là:", "options": [ "7 m/s", "1 m/s", "5 m/s", "12 m/s" ], "answer": 2, "points": 0.5 },
+  { "question": "Với dữ kiện ở câu 5, giả sử sông rộng 200 m. Quãng đường thực tế mà ca nô đã di chuyển được khi sang đến bờ bên kia là:", "options": [ "200 m", "250 m", "150 m", "300 m" ], "answer": 1, "points": 0.5 },
+  { "question": "Mưa rơi thẳng đứng với tốc độ 8 m/s đối với mặt đất. Một ô tô chạy ngang với tốc độ 6 m/s. Độ lớn vận tốc của giọt mưa đối với người trong ô tô là:", "options": [ "10 m/s", "14 m/s", "2 m/s", "8 m/s" ], "answer": 0, "points": 0.5 },
+  { "question": "Tàu A dài 120 m chạy với tốc độ 20 m/s. Tàu B dài 80 m chạy cùng chiều với tốc độ 15 m/s. Thời gian từ lúc đầu tàu A ngang đuôi tàu B đến khi đuôi tàu A vượt hoàn toàn đầu tàu B là:", "options": [ "40 s", "8 s", "24 s", "50 s" ], "answer": 0, "points": 0.5 },
+  { "question": "Hai xe xuất phát cùng lúc từ một ngã tư. Xe A chạy về Bắc với tốc độ 40 km/h, xe B chạy về Đông với tốc độ 30 km/h. Độ lớn vận tốc tương đối của xe A so với xe B là:", "options": [ "70 km/h", "10 km/h", "50 km/h", "1200 km/h" ], "answer": 2, "points": 0.5 },
+  { "question": "Một chiếc thuyền muốn đi thẳng ngang qua sông có dòng nước chảy với vận tốc u = 3 m/s. Vận tốc thuyền so với nước là v = 5 m/s. Mũi thuyền hướng chếch ngược dòng một góc α so với bờ. Giá trị của cosα bằng:", "options": [ "3/5", "4/5", "3/4", "4/3" ], "answer": 0, "points": 0.5 },
+  { "question": "Một xe máy chạy trên đường thẳng. Nửa thời gian đầu xe chạy với tốc độ 40 km/h, nửa thời gian sau chạy với tốc độ 60 km/h. Tốc độ trung bình trong toàn bộ thời gian là:", "options": [ "48 km/h", "50 km/h", "52 km/h", "45 km/h" ], "answer": 1, "points": 0.5 },
+  { "question": "Kim phút của một đồng hồ dài gấp 1,5 lần kim giờ. Coi hai kim quay đều. Tỉ số giữa tốc độ của đầu kim phút và tốc độ của đầu kim giờ là:", "options": [ "18", "12", "1,5", "8" ], "answer": 0, "points": 0.5 },
+  { "question": "Một người đi xe đạp từ O: đi về Đông 3 km, rẽ trái đi về Bắc 4 km, rồi rẽ trái đi về Tây 6 km đến M. Độ lớn độ dịch chuyển từ O đến M là:", "options": [ "13 km", "5 km", "7 km", "1 km" ], "answer": 1, "points": 0.5 },
+  { "question": "Một ca nô đi từ A xuôi dòng đến B mất 2 giờ, sau đó ngược dòng từ B về A mất 3 giờ. Nếu một chiếc lá rơi xuống sông tại A, nó sẽ trôi theo dòng nước đến B mất:", "options": [ "12 giờ", "6 giờ", "5 giờ", "1 giờ" ], "answer": 0, "points": 0.5 },
+  { "question": "Một ô tô chạy thẳng đều về phía vách núi với tốc độ 20 m/s. Tài xế bấm còi và nghe tiếng vang sau 2 s. Biết tốc độ âm trong không khí là 340 m/s. Khoảng cách từ ô tô đến vách núi lúc bấm còi là:", "options": [ "680 m", "360 m", "320 m", "720 m" ], "answer": 1, "points": 0.5 },
+  { "question": "Chó săn A đuổi thỏ B trên đường thẳng. Chó chạy 15 m/s, thỏ chạy 10 m/s, khoảng cách ban đầu 50 m. Chim ưng bay qua lại giữa chó và thỏ với tốc độ 25 m/s cho đến khi chó bắt được thỏ. Tổng quãng đường chim bay là:", "options": [ "125 m", "250 m", "50 m", "500 m" ], "answer": 1, "points": 0.5 },
+  { "question": "Vectơ vận tốc tức thời của một vật chuyển động có đặc điểm nào sau đây?", "options": [ "Luôn có phương trùng với bán kính quỹ đạo nếu vật chuyển động cong.", "Luôn hướng về tâm quỹ đạo.", "Luôn có phương tiếp tuyến với quỹ đạo chuyển động tại điểm đang xét.", "Luôn có độ lớn bằng quãng đường chia cho khoảng thời gian chuyển động." ], "answer": 2, "points": 0.5 },
+  { "question": "Hai chất điểm M và N cùng xuất phát từ O, chuyển động thẳng đều dọc Ox. Phương trình: x₁ = 30t và x₂ = 40t (km, h). Vận tốc của M đối với N là:", "options": [ "10 km/h", "−10 km/h", "70 km/h", "−70 km/h" ], "answer": 1, "points": 0.5 },
+  { "question": "Một vật chuyển động thẳng có độ lớn vận tốc tăng dần. Chọn kết luận đúng.", "options": [ "Quãng đường đi được trong những khoảng thời gian bằng nhau liên tiếp luôn bằng nhau.", "Vận tốc trung bình trong mỗi giây luôn bằng tốc độ tức thời ở đầu giây đó.", "Tốc độ trung bình trên toàn bộ quãng đường luôn lớn hơn tốc độ tức thời ở cuối quãng đường.", "Tốc độ trung bình trên một quãng đường luôn nhỏ hơn tốc độ tức thời tại điểm cuối của quãng đường đó." ], "answer": 3, "points": 0.5 },
+  { "question": "Hai ô tô A và B xuất phát cùng lúc từ O, chạy trên hai đường hợp nhau góc 60°. Tốc độ A là 30 km/h, B là 40 km/h. Khoảng cách giữa hai ô tô sau 1 giờ là:", "options": [ "50 km", "70 km", "√1300 km", "10 km" ], "answer": 2, "points": 0.5 }
+];
+
+/* ============================================================
+   TRẠNG THÁI GAME
+   ============================================================ */
+let current = 0;
+let score = 0;
+let correct = 0;
+let answered = false;
+let soundOn = true;
+
+let studentNameVal = "";
+let studentClassVal = "";
+let timerInterval = null;
+let timeLeft = 20 * 60; // 20 phút
+
+// URL của Web App Apps Script - Giáo viên dán link ở Bước 1 vào đây
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2ROz8Ea52EmMuwlTNBFWED6SDRgw8KP1rVawW_oDHRHd0aUTu4mqJzILGyYb3NSMK0w/exec';
+
+/* ============================================================
+   XỬ LÝ ĐỒNG HỒ ĐẾM NGƯỢC
+   ============================================================ */
+function startTimer() {
+  timeLeft = 20 * 60;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      alert("Đã hết 20 phút! Hệ thống sẽ tự động nộp bài.");
+      finishGame(); 
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timeLeft / 60);
+  const s = timeLeft % 60;
+  $("timerDisplay").textContent = `⏳ ${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+}
+
+/* ============================================================
+   ÂM THANH BẰNG WEB AUDIO API
+   ============================================================ */
+let audioCtx = null;
+let musicTimer = null;
+
+function initAudio() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+}
+
+function tone(freq, duration=0.12, type="sine", volume=0.04) {
+  if (!soundOn || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type; osc.frequency.value = freq;
+  gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + duration);
+}
+
+function clickSound() { tone(440,.1,"sine",.05); }
+function finishSound() { [523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.18,"sine",.045),i*110)); }
+function startMusic() {
+  if (!soundOn || musicTimer) return;
+  const notes=[261.63,329.63,392,329.63,293.66,349.23,440,349.23];
+  let i=0;
+  musicTimer=setInterval(()=>{ if(soundOn) tone(notes[i++%notes.length],.24,"sine",.012); },650);
+}
+function stopMusic() {
+  if(musicTimer) { clearInterval(musicTimer); musicTimer=null; }
+}
+
+const $ = id => document.getElementById(id);
+const screens = ["startScreen","gameScreen","resultScreen"];
+
+function showScreen(id) {
+  screens.forEach(s => $(s).classList.toggle("active", s===id));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function renderQuestion() {
+  const q=QUESTIONS[current];
+  answered=false;
+  $("progressText").textContent=`Câu ${current+1} / ${QUESTIONS.length}`;
+  $("progressBar").style.width=`${(current/QUESTIONS.length)*100}%`;
+  $("questionBadge").textContent=`CÂU ${current+1}`;
+  $("questionText").textContent=q.question;
+  $("nextBtn").classList.add("hidden");
+  $("options").innerHTML="";
+
+  const letters=["A","B","C","D","E","F"];
+  q.options.forEach((opt,i)=>{
+    const b=document.createElement("button");
+    b.className="option";
+    b.innerHTML=`<span class="letter">${letters[i]}</span><span>${escapeHTML(opt)}</span>`;
+    b.addEventListener("click",()=>selectAnswer(i,b));
+    $("options").appendChild(b);
+  });
+}
+
+function escapeHTML(str) {
+  return String(str).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function selectAnswer(index, button) {
+  if(answered) return;
+  answered=true;
+  initAudio();
+  clickSound(); 
+
+  const q=QUESTIONS[current];
+  const buttons=[...$("options").querySelectorAll(".option")];
+  
+  // Vô hiệu hóa các nút khác và đánh dấu nút vừa chọn
+  buttons.forEach(b=>b.classList.add("disabled"));
+  button.classList.add("selected");
+
+  // Tính điểm ngầm (0,5 điểm mỗi câu)
+  if(index === q.answer) {
+    score += Number(q.points)||0;
+    correct++;
+  }
+  
+  $("nextBtn").classList.remove("hidden");
+  $("progressBar").style.width=`${((current+1)/QUESTIONS.length)*100}%`;
+}
+
+function nextQuestion() {
+  if(!answered) return;
+  if(current < QUESTIONS.length-1) {
+    current++;
+    renderQuestion();
+  } else {
+    finishGame();
+  }
+}
+
+/* ============================================================
+   KẾT THÚC GAME VÀ LƯU GOOGLE SHEET
+   ============================================================ */
+function finishGame() {
+  clearInterval(timerInterval); 
+  stopMusic();
+  finishSound();
+  
+  const wrongCount = QUESTIONS.length - correct;
+  
+  // Hiển thị: Đúng, Sai, Điểm (tối đa 10)
+  $("correctCount").textContent = correct;
+  $("wrongCount").textContent = wrongCount;
+  $("finalScore").textContent = score;
+  
+  const pct = QUESTIONS.length ? Math.round(correct/QUESTIONS.length*100) : 0;
+  
+  $("resultMessage").textContent = "Đang lưu kết quả lên hệ thống...";
+  showScreen("resultScreen");
+
+  submitToGoogleSheet(pct);
+}
+
+function submitToGoogleSheet(pct) {
+  if(SCRIPT_URL === 'DÁN_LINK_WEB_APP_CỦA_BẠN_VÀO_ĐÂY' || SCRIPT_URL === '') {
+    $("resultMessage").textContent = "Hoàn thành! (Chưa cấu hình link lưu điểm Google Sheet)";
+    return;
+  }
+
+  let formData = new FormData();
+  formData.append("name", studentNameVal);
+  formData.append("className", studentClassVal);
+  formData.append("score", score);
+  formData.append("correct", correct);
+  formData.append("accuracy", pct + "%");
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: formData
+  }).then(() => {
+    $("resultMessage").textContent = "✅ Đã nộp bài và lưu kết quả thành công!";
+  }).catch(error => {
+    $("resultMessage").textContent = "❌ Có lỗi xảy ra khi lưu kết quả. Vui lòng chụp màn hình gửi Giáo viên.";
+  });
+}
+
+/* ============================================================
+   CÁC SỰ KIỆN CLICK
+   ============================================================ */
+$("startBtn").addEventListener("click",()=>{
+  studentNameVal = $("studentName").value.trim();
+  studentClassVal = $("studentClass").value.trim();
+
+  if(!studentNameVal || !studentClassVal) {
+    alert("Vui lòng nhập đầy đủ Họ Tên và Lớp trước khi bắt đầu!");
+    return;
+  }
+
+  initAudio();
+  current=0; score=0; correct=0;
+  startMusic();
+  startTimer(); 
+  renderQuestion();
+  showScreen("gameScreen");
+});
+
+$("nextBtn").addEventListener("click",nextQuestion);
+
+$("soundBtn").addEventListener("click",()=>{
+  soundOn=!soundOn;
+  $("soundBtn").textContent=soundOn ? "🔊 Âm thanh: Bật" : "🔇 Âm thanh: Tắt";
+  if(soundOn) { initAudio(); startMusic(); }
+  else stopMusic();
+});
+
+document.addEventListener("keydown",e=>{
+  if((e.key==="Enter" || e.key===" ") && $("nextBtn").classList.contains("hidden")===false) {
+    e.preventDefault(); nextQuestion();
+  }
+});
+</script>
+</body>
+</html>
